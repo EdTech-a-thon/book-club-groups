@@ -68,7 +68,7 @@
   }
 </script>
 
-<header class="student-header"><a class="brand brand-light" href="/"><span class="brand-mark">G</span><span>Group Readers</span></a></header>
+<header class="student-header"><a class="brand brand-light" href="/"><span class="brand-mark"></span><span>Group Readers</span></a></header>
 
 {#if loading}
   <main class="center-page student-bg"><div class="loader light-loader"></div></main>

@@ -17,7 +17,7 @@
       navigate("/");
     }}
   >
-    <span class="brand-mark">G</span><span>Group Readers</span>
+    <span class="brand-mark"></span><span>Group Readers</span>
   </a>
   <div class="teacher-menu">
     <span class="avatar">{avatarInitial(username)}</span>

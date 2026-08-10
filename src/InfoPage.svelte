@@ -15,7 +15,7 @@
 
 <header class="topbar">
   <a class="brand" href="/" onclick={home}>
-    <span class="brand-mark">G</span><span>Group Readers</span>
+    <span class="brand-mark"></span><span>Group Readers</span>
   </a>
   <a class="text-link" href="/" onclick={home}>← Back to Group Readers</a>
 </header>
