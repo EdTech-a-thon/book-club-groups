@@ -16,8 +16,9 @@ a { color: inherit; }
 .eyebrow.light { color: #f1b85f; }
 .muted { color: var(--muted); }
 .brand { display: inline-flex; align-items: center; gap: .7rem; text-decoration: none; font-family: "Fraunces", serif; font-weight: 700; font-size: 1.1rem; }
-.brand-mark { display: grid; place-items: center; width: 34px; height: 38px; border-radius: 4px 9px 9px 4px; color: white; background: var(--coral); box-shadow: inset 4px 0 rgba(0,0,0,.14); }
+.brand-mark { flex: 0 0 auto; width: 36px; height: 36px; background: url(./assets/logomark.svg) center/contain no-repeat; }
 .brand-light { color: white; }
+.brand-light .brand-mark { background-image: url(./assets/logomark-light.svg); }
 .button { border: 0; border-radius: 8px; padding: .85rem 1.15rem; font-weight: 700; transition: transform .15s, background .15s, opacity .15s; }
 .button:hover:not(:disabled) { transform: translateY(-1px); }
 .button:disabled { opacity: .5; cursor: not-allowed; }

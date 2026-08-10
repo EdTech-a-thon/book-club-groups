@@ -56,7 +56,7 @@
 <main class="auth-page">
   <section class="auth-intro">
     <a class="brand brand-light" href="/" aria-label="Group Readers home">
-      <span class="brand-mark">G</span>
+      <span class="brand-mark"></span>
       <span>Group Readers</span>
     </a>
     <div class="intro-copy">
