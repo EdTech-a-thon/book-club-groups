@@ -55,9 +55,9 @@ create table public.teachers (
   created_at timestamptz not null default now()
 );
 
--- Display names are unique regardless of capitalisation, so two teachers
--- cannot show students the same name.
-create unique index teachers_username_key on public.teachers (lower(username));
+-- Display names do not identify accounts. Different teachers may use the same
+-- name because each teacher's students arrive through that class's private
+-- book-list link.
 
 -- A teacher keeps one book list per group of students they teach — say one for
 -- each class period. Every list has its own books, its own student link, its own

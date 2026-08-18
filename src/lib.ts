@@ -149,11 +149,10 @@ export async function shrinkCover(file: File, maxWidth = 480, maxHeight = 720) {
 const friendlyMessages: [RegExp, string][] = [
   [/already registered/i, "An account with that email already exists. Try signing in instead."],
   [/invalid login credentials/i, "That email or password is not right."],
-  [/teachers_username_key/i, "Another teacher is already using that name."],
   [/teachers_username_check/i, "Names can be 3 to 30 letters, numbers, spaces, or . _ - ' characters."],
   [/book_lists_name_check/i, "Give your book list a name of 1 to 60 characters."],
   [/book_lists_ranked_books_check/i, `Students can rank from ${minimumRankedBooks} to ${maximumRankedBooks} books.`],
-  [/database error saving new user/i, "We could not create that account. Try a different name."],
+  [/database error saving new user/i, "We could not create that account. Please try again."],
 ];
 
 export function errorMessage(error: unknown) {
