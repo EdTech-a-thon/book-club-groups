@@ -1,23 +1,17 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import SiteFooter from "./SiteFooter.svelte";
-  import { navigate } from "./lib";
 
-  // The frame the About and Privacy pages share: a plain header, a heading, and
-  // whatever sections that page wants to fill in.
   let { title, lede, children }: { title: string; lede: string; children: Snippet } = $props();
-
-  function home(event: MouseEvent) {
-    event.preventDefault();
-    navigate("/");
-  }
 </script>
 
+<svelte:head>
+  <title>{title} · Group Readers</title>
+</svelte:head>
+
 <header class="topbar">
-  <a class="brand" href="/" onclick={home}>
-    <span class="brand-mark"></span><span>Group Readers</span>
-  </a>
-  <a class="text-link" href="/" onclick={home}>← Back to Group Readers</a>
+  <a class="brand" href="/"><span class="brand-mark"></span><span>Group Readers</span></a>
+  <a class="text-link" href="/">← Back to Group Readers</a>
 </header>
 
 <main class="info-page shell narrow">

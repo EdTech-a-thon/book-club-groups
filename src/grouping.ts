@@ -1,4 +1,4 @@
-import type { Book } from "./lib";
+import type { Book } from "./types";
 
 export type GroupingStrategy = "overall" | "first" | "last";
 export type GroupingSettings = { minimumSize: number; maximumSize: number; strategy: GroupingStrategy; bookLimits: Record<string, number> };
@@ -162,8 +162,8 @@ export function createGroups(books: Book[], students: GroupingStudent[], setting
   const groups: BookGroup[] = [];
   books.forEach((book, bookIndex) => {
     let offset = 0;
-    groupSizes(membersByBook[bookIndex].length, winner!.groupCounts[bookIndex]).forEach((size, groupIndex) => {
-      groups.push({ bookId: book.id, groupNumber: groupIndex + 1, members: membersByBook[bookIndex].slice(offset, offset + size) });
+    groupSizes(membersByBook[bookIndex].length, winner!.groupCounts[bookIndex]).forEach((size) => {
+      groups.push({ bookId: book.id, groupNumber: groups.length + 1, members: membersByBook[bookIndex].slice(offset, offset + size) });
       offset += size;
     });
   });

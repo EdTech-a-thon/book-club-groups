@@ -1,5 +1,5 @@
 import type { GroupingResult } from "./grouping";
-import type { Book } from "./lib";
+import type { Book } from "./types";
 
 // Excel and Google Sheets both open a comma-separated file directly, so a draft
 // can leave here and come back as a teacher's own edited copy without asking
@@ -30,14 +30,14 @@ export function groupsToCsv(result: GroupingResult, books: Book[]) {
       rows.push([
         titles.get(group.bookId) || "",
         group.groupNumber,
-        `${member.firstName} ${member.lastInitial}.`,
+        member.lastInitial ? `${member.firstName} ${member.lastInitial}.` : member.firstName,
         member.rank,
         "",
       ]);
     }
   }
   for (const student of result.unplaced) {
-    rows.push(["", "", `${student.firstName} ${student.lastInitial}.`, "", "Needs placement"]);
+    rows.push(["", "", student.lastInitial ? `${student.firstName} ${student.lastInitial}.` : student.firstName, "", "Needs placement"]);
   }
   return csvFile(rows);
 }
