@@ -15,6 +15,7 @@ export type ImportResult = {
 
 export type RankConflict = {
   key: string;
+  kind: "duplicate" | "missing";
   studentName: string;
   rank: number;
   options: { bookId: string; title: string }[];
@@ -149,6 +150,7 @@ export function importResponses(text: string, resolutions: Record<string, string
         unresolved = true;
         conflicts.push({
           key,
+          kind: "duplicate",
           studentName: name,
           rank,
           options: duplicateChoices.map((choice) => ({
@@ -161,12 +163,29 @@ export function importResponses(text: string, resolutions: Record<string, string
     if (unresolved) {
       return;
     }
-    const resolvedRanks = ranked.map((choice) => choice.rank);
-    const missing = Array.from({ length: Math.max(...resolvedRanks) }, (_, index) => index + 1).filter((rank) => !resolvedRanks.includes(rank));
-    if (missing.length) {
-      errors.push(`${name} is missing choice ${missing.join(", ")}.`);
+    const missing = Array.from({ length: expectedRanks }, (_, index) => index + 1).filter((rank) => !ranked.some((choice) => choice.rank === rank));
+    missing.forEach((rank) => {
+      const key = `row-${rowIndex + 2}-rank-${rank}`;
+      const availableBooks = books.filter((book) => !ranked.some((choice) => choice.bookId === book.id));
+      const selected = resolutions[key];
+      if (selected && availableBooks.some((book) => book.id === selected)) {
+        ranked.push({ rank, bookId: selected });
+      } else {
+        unresolved = true;
+        conflicts.push({
+          key,
+          kind: "missing",
+          studentName: name,
+          rank,
+          options: availableBooks.map((book) => ({ bookId: book.id, title: book.title })),
+        });
+      }
+    });
+    if (unresolved) {
       return;
     }
+    ranked.sort((left, right) => left.rank - right.rank);
+    const resolvedRanks = ranked.map((choice) => choice.rank);
     if (resolvedRanks.length !== expectedRanks) {
       errors.push(`${name} ranked ${resolvedRanks.length} books; the other responses rank ${expectedRanks}.`);
       return;

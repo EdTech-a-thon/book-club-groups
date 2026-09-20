@@ -22,6 +22,7 @@ describe("spreadsheet import", () => {
     expect(result.errors).toEqual([]);
     expect(result.conflicts[0]).toEqual({
       key: "row-2-rank-1",
+      kind: "duplicate",
       studentName: "Ada",
       rank: 1,
       options: [
@@ -32,6 +33,22 @@ describe("spreadsheet import", () => {
     const resolved = importResponses('Name,Book A,Book B\nAda,First Choice,First Choice', { "row-2-rank-1": "book-2" });
     expect(resolved.conflicts).toEqual([]);
     expect(resolved.data?.students[0].choices).toEqual(["book-2"]);
+  });
+
+  test("offers missing ranks for teacher resolution", () => {
+    const csv = "Name,Book A,Book B,Book C,Book D,Book E\nAda,First Choice,Second Choice,Third Choice,,Fifth Choice\nBen,First Choice,Second Choice,Third Choice,Fourth Choice,Fifth Choice";
+    const result = importResponses(csv);
+    expect(result.errors).toEqual([]);
+    expect(result.conflicts[0]).toEqual({
+      key: "row-2-rank-4",
+      kind: "missing",
+      studentName: "Ada",
+      rank: 4,
+      options: [{ bookId: "book-4", title: "Book D" }],
+    });
+    const resolved = importResponses(csv, { "row-2-rank-4": "book-4" });
+    expect(resolved.conflicts).toEqual([]);
+    expect(resolved.data?.students[0].choices).toEqual(["book-1", "book-2", "book-3", "book-4", "book-5"]);
   });
 
   test("supports exact choice labels through tenth choice", () => {

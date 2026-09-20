@@ -1,9 +1,22 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import SiteFooter from "./SiteFooter.svelte";
   import { downloadGroups } from "./export";
   import { createGroups, type GroupingResult, type GroupingStrategy } from "./grouping";
   import { importResponses, type ImportedResponses, type RankConflict } from "./spreadsheet";
   import { formTemplateLinks } from "./templateLinks";
+
+  const storageKey = "group-readers-workspace-v1";
+
+  type SavedWorkspace = {
+    version: 1;
+    imported: ImportedResponses;
+    minimumSize: number;
+    maximumSize: number;
+    strategy: GroupingStrategy;
+    bookLimits: Record<string, number>;
+    result?: GroupingResult;
+  };
 
   let pasted = $state("");
   let imported = $state<ImportedResponses>();
@@ -14,12 +27,44 @@
   let minimumSize = $state(3);
   let maximumSize = $state(4);
   let strategy = $state<GroupingStrategy>("overall");
-  let responseMethod = $state<"csv" | "sheet">("csv");
+  let responseMethod = $state<"csv" | "sheet">("sheet");
   let selectedTemplateRanks = $state<number>();
   let bookLimits = $state<Record<string, number>>({});
   let result = $state<GroupingResult>();
+  let storageReady = $state(false);
   const numberWords = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
   const selectedTemplateLink = $derived(selectedTemplateRanks ? formTemplateLinks[selectedTemplateRanks] : undefined);
+
+  onMount(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "null") as SavedWorkspace | null;
+      if (saved?.version === 1 && saved.imported && Array.isArray(saved.imported.books) && Array.isArray(saved.imported.students)) {
+        imported = saved.imported;
+        minimumSize = saved.minimumSize;
+        maximumSize = saved.maximumSize;
+        strategy = saved.strategy;
+        bookLimits = saved.bookLimits;
+        result = saved.result;
+      }
+    } catch {
+      // A damaged browser entry should never prevent Group Readers from opening.
+    }
+    storageReady = true;
+  });
+
+  $effect(() => {
+    if (!storageReady) return;
+    if (!imported) {
+      localStorage.removeItem(storageKey);
+      return;
+    }
+    const saved: SavedWorkspace = { version: 1, imported, minimumSize, maximumSize, strategy, bookLimits, result };
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(saved));
+    } catch {
+      // Grouping still works when browser storage is unavailable or full.
+    }
+  });
 
   function readResponses(text = pasted, keepResolutions = false) {
     error = "";
@@ -65,6 +110,11 @@
     error = "";
   }
 
+  function clearGroups() {
+    if (!confirm("Clear the generated groups saved in this browser? Your imported responses will stay ready so you can generate again.")) return;
+    result = undefined;
+  }
+
   function titleFor(bookId: string) {
     return imported?.books.find((book) => book.id === bookId)?.title || "Book";
   }
@@ -95,7 +145,7 @@
       <p class="eyebrow">Book club group maker</p>
       <h1>Turn student choices into balanced reading groups.</h1>
       <p class="local-lede">Collect preferences with your Google Form, paste the spreadsheet here, and get a balanced grouping you can download and adjust.</p>
-      <div class="local-promises" aria-label="Privacy details"><span>No account</span><span>No student uploads</span><span>No saved data</span></div>
+      <div class="local-promises" aria-label="Privacy details"><span>No account</span><span>No student uploads</span><span>Saved only on this device</span></div>
     </div>
     <div id="import-responses" class="local-start-card">
       <p class="eyebrow">Add responses</p>
@@ -106,7 +156,7 @@
         <button class="button primary" disabled={!pasted.trim()} onclick={() => readResponses()}>Read responses</button>
         <label class="button subtle file-button">Choose CSV<input type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" onchange={openFile} /></label>
       </div>
-      <p class="local-note">Your response sheet stays on this device. It is never uploaded or saved.</p>
+      <p class="local-note">Your response sheet stays on this device. This browser remembers it until you clear it or use a different sheet.</p>
     </div>
   </section>
 
@@ -119,11 +169,11 @@
 
   {#if conflicts.length}
     <section class="shell conflict-panel" aria-live="polite">
-      <div class="conflict-heading"><div><p class="eyebrow">Resolve tied choices</p><h2>Which book should keep each duplicated rank?</h2><p>The other book will be treated as unselected for that student.</p></div></div>
+      <div class="conflict-heading"><div><p class="eyebrow">Complete the rankings</p><h2>A few choices need your decision.</h2><p>Choose a book for every duplicated or missing rank. You do not need to edit and import the spreadsheet again.</p></div></div>
       <div class="conflict-list">
         {#each conflicts as conflict}
           <fieldset>
-            <legend><strong>{conflict.studentName}</strong> marked more than one book as their {ordinal(conflict.rank)} choice. Which one should they get?</legend>
+            <legend>{#if conflict.kind === "duplicate"}<strong>{conflict.studentName}</strong> marked more than one book as their {ordinal(conflict.rank)} choice. Which one should they get?{:else}<strong>{conflict.studentName}</strong> is missing a {ordinal(conflict.rank)} choice. Choose one of their unranked books to fill it.{/if}</legend>
             <div>
               {#each conflict.options as option}
                 <label class:chosen={resolutions[conflict.key] === option.bookId}>
@@ -142,8 +192,8 @@
   {#if imported}
     <section class="local-workspace shell">
       <div class="workspace-heading">
-        <div><p class="eyebrow">2 · Shape the groups</p><h2>{imported.students.length} students and {imported.books.length} books are ready.</h2><p>Each student ranked {imported.rankedBooks} books. Choose the group sizes and how the best fit should be decided.</p></div>
-        <button class="button text" onclick={reset}>Use a different sheet</button>
+        <div><p class="eyebrow">Shape the groups</p><h2>{imported.students.length} students and {imported.books.length} books are ready.</h2><p>Each student ranked {imported.rankedBooks} books. Choose the group sizes and how the best fit should be decided.</p></div>
+        <button class="button text" onclick={reset}>Clear and use a different sheet</button>
       </div>
       {#if error}<p class="message error" role="alert">{error}</p>{/if}
       <div class="group-settings">
@@ -168,7 +218,7 @@
 
       {#if result}
         <section class="group-results">
-          <div class="results-head"><div><p class="eyebrow">3 · Your result</p><h2>{result.placed} of {imported.students.length} students placed</h2></div><button class="button primary" onclick={() => downloadGroups(result!, imported!.books, "Book club")}>Download spreadsheet</button></div>
+          <div class="results-head"><div><p class="eyebrow">Your result</p><h2>{result.placed} of {imported.students.length} students placed</h2><span class="browser-saved">Saved in this browser</span></div><div class="result-buttons"><button class="button subtle" onclick={clearGroups}>Clear saved groups</button><button class="button primary" onclick={() => downloadGroups(result!, imported!.books, "Book club")}>Download spreadsheet</button></div></div>
           <p class="export-note">The download opens in Excel or Google Sheets, where you can move anyone by hand.</p>
           <div class="placement-summary">{#each result.rankCounts as count, index}<span><strong>{count}</strong>{ordinal(index + 1)} choice</span>{/each}<span class:attention={result.unplaced.length > 0}><strong>{result.unplaced.length}</strong>need help</span></div>
           <div class="generated-groups local-generated-groups">
@@ -203,8 +253,8 @@
         <div class="guide-number">3</div>
         <div class="guide-copy full"><p class="eyebrow">Move the responses</p><h3>How do you want to bring the responses into Group Readers?</h3><p>Choose one method to see the complete path from Google Forms into the importer.</p>
           <div class="method-options" role="group" aria-label="Response export method">
-            <button class:chosen={responseMethod === "csv"} aria-pressed={responseMethod === "csv"} onclick={() => (responseMethod = "csv")}><span class="method-icon">CSV</span><span><strong>Download a CSV</strong><small>Best when you want a file you can keep.</small></span><b aria-hidden="true">{responseMethod === "csv" ? "✓" : ""}</b></button>
-            <button class:chosen={responseMethod === "sheet"} aria-pressed={responseMethod === "sheet"} onclick={() => (responseMethod = "sheet")}><span class="method-icon sheet-icon">▦</span><span><strong>Use the linked spreadsheet</strong><small>Best for copying directly from Google Sheets or Excel.</small></span><b aria-hidden="true">{responseMethod === "sheet" ? "✓" : ""}</b></button>
+            <button class:chosen={responseMethod === "sheet"} aria-pressed={responseMethod === "sheet"} onclick={() => (responseMethod = "sheet")}><span class="method-icon sheet-icon">▦</span><span><strong>Link to spreadsheet</strong><small>Copy directly from the response spreadsheet.</small></span><b aria-hidden="true">{responseMethod === "sheet" ? "✓" : ""}</b></button>
+            <button class:chosen={responseMethod === "csv"} aria-pressed={responseMethod === "csv"} onclick={() => (responseMethod = "csv")}><span class="method-icon">CSV</span><span><strong>Download as CSV</strong><small>Download a file you can keep and import.</small></span><b aria-hidden="true">{responseMethod === "csv" ? "✓" : ""}</b></button>
           </div>
           {#if responseMethod === "csv"}
             <div class="method-instructions"><strong>Download, then import:</strong><ol><li>In Google Forms, open the <b>Responses</b> tab.</li><li>Open the three-dot menu and choose <b>Download responses (.csv)</b>.</li><li>Unzip the downloaded folder if necessary.</li><li>Return to Group Readers and select <b>Choose CSV</b>.</li><li>Open the CSV you just downloaded.</li></ol><a class="button primary guide-action" href="#import-responses">Go to Choose CSV</a></div>
@@ -219,7 +269,6 @@
       </li>
     </ol>
   </section>
-  <section id="privacy" class="local-privacy shell"><div><p class="eyebrow light">Privacy by design</p><h2>Nothing leaves your browser.</h2></div><p>Group Readers does not create an account, upload the response sheet, or save student names. Closing or refreshing this page clears the imported responses and generated groups.</p></section>
 </main>
 
 <SiteFooter />

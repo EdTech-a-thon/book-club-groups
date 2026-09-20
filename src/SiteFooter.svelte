@@ -11,8 +11,8 @@
     </span>
   </p>
   <nav>
-    <a href="/#how-it-works">How it works</a>
-    <a href="/#privacy">Privacy</a>
+    <a href="/about">About</a>
+    <a href="/privacy">Privacy</a>
     <a href="mailto:support@groupreaders.com?subject=Group%20Readers%20Support">Support</a>
   </nav>
 </footer>
