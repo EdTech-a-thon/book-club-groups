@@ -1,4 +1,4 @@
-import type { Book } from "./lib";
+import type { Book } from "./types";
 
 export type GroupingStrategy = "overall" | "first" | "last";
 export type GroupingSettings = { minimumSize: number; maximumSize: number; strategy: GroupingStrategy; bookLimits: Record<string, number> };
