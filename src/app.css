@@ -51,6 +51,7 @@ input:focus, textarea:focus { border-color: var(--green-2); box-shadow: 0 0 0 3p
 .local-promises { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1.8rem; }
 .local-promises span { padding: .55rem .75rem; color: #34564b; background: rgba(255,255,255,.75); border: 1px solid #d6dbd5; border-radius: 7px; font-size: .78rem; font-weight: 700; }
 .local-start-card { padding: clamp(1.4rem,3vw,2rem); background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 18px 45px rgba(34,57,49,.1); }
+.local-start-card { scroll-margin-top: 24px; }
 .local-start-card h2 { margin-bottom: .75rem; font-size: 2rem; }
 .local-start-card > p:not(.eyebrow) { color: var(--muted); line-height: 1.55; }
 .local-start-card textarea { margin-top: .4rem; background: #f7f6f2; }
@@ -93,12 +94,51 @@ input:focus, textarea:focus { border-color: var(--green-2); box-shadow: 0 0 0 3p
 .text-group header .group-size strong { color: var(--green); font: 700 1.55rem "Fraunces",serif; line-height: 1; }
 .text-group header .group-size span { margin-top: .2rem; color: var(--muted); letter-spacing: .04em; text-transform: none; }
 .text-group > ul { padding: .45rem 1.1rem .7rem; }
-.local-info { display: grid; grid-template-columns: .65fr 1.35fr; gap: 4rem; padding-block: 80px; border-top: 1px solid var(--line); }
-.local-info ol { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin: 0; padding: 0; list-style: none; }
-.local-info li { display: grid; align-content: start; gap: .75rem; padding: 1.2rem; background: white; border: 1px solid var(--line); border-radius: 10px; }
-.local-info li b { display: grid; place-items: center; width: 30px; height: 30px; color: white; background: var(--coral); border-radius: 50%; }
-.local-info li span { color: var(--muted); font-size: .86rem; line-height: 1.5; }
-.local-info li strong { display: block; margin-bottom: .3rem; color: var(--ink); font: 700 1.05rem "Fraunces",serif; }
+.instruction-guide { padding-block: 85px 100px; border-top: 1px solid var(--line); scroll-margin-top: 20px; }
+.instruction-guide > header { max-width: 760px; margin-bottom: 2.2rem; }
+.instruction-guide > header h2 { margin-bottom: .7rem; }
+.instruction-guide > header > p:last-child { color: var(--muted); font-size: 1rem; line-height: 1.65; }
+.guide-steps { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.guide-step { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 1.2rem; align-items: start; padding: 1.5rem; background: white; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 16px rgba(41,56,50,.04); }
+.guide-step.highlighted { border-color: #b9cbbf; background: #f5f9f6; }
+.guide-number { display: grid; place-items: center; width: 48px; height: 48px; color: white; background: var(--green); border-radius: 50%; font: 700 1.35rem "Fraunces",serif; }
+.guide-copy { max-width: 900px; }
+.guide-copy .eyebrow { margin-bottom: .35rem; }
+.guide-copy h3 { margin: 0 0 .55rem; font: 700 1.35rem "Fraunces",serif; }
+.guide-copy > p:not(.eyebrow) { max-width: 820px; margin-bottom: 0; color: var(--muted); line-height: 1.65; }
+.guide-copy aside { max-width: 800px; margin-top: 1rem; padding: .8rem 1rem; color: #6d501f; background: #fff4dc; border-left: 4px solid var(--gold); border-radius: 0 7px 7px 0; font-size: .85rem; line-height: 1.55; }
+.guide-copy aside strong { display: block; color: #503812; }
+.guide-copy aside.edit-warning { color: #842f25; background: #fff0ed; border-left-color: #c94f3d; }
+.guide-copy aside.edit-warning strong { color: #842f25; }
+.template-counts { display: grid; grid-template-columns: repeat(10,minmax(64px,1fr)); gap: .45rem; margin-top: 1.2rem; }
+.template-counts button { display: grid; justify-items: center; gap: .15rem; padding: .7rem .25rem; color: var(--muted); background: #faf9f5; border: 2px solid transparent; border-radius: 8px; }
+.template-counts button:hover { background: #f1f3ee; }
+.template-counts button.chosen { color: var(--green); background: #e9f2ec; border-color: var(--green-2); }
+.template-counts strong { font: 700 1.25rem "Fraunces",serif; }
+.template-counts span { font-size: .67rem; font-weight: 700; }
+.template-result { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: .8rem; padding: 1rem; border-radius: 9px; }
+.template-result.ready { background: #edf4ef; border: 1px solid #c5d9ca; }
+.template-result.pending { color: #725321; background: #fff4dc; border: 1px solid #ead5a7; }
+.template-result > div { display: grid; gap: .2rem; }
+.template-result span { color: var(--muted); font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.template-result strong { font-family: "Fraunces",serif; }
+.template-result small { color: var(--muted); line-height: 1.4; }
+.method-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .7rem; margin-top: 1.2rem; }
+.method-options button { display: grid; grid-template-columns: 48px minmax(0,1fr) 24px; gap: .8rem; align-items: center; padding: 1rem; text-align: left; color: var(--ink); background: #faf9f5; border: 2px solid transparent; border-radius: 10px; }
+.method-options button:hover { background: #f3f4ef; }
+.method-options button.chosen { border-color: var(--green-2); background: #edf4ef; }
+.method-options button > span:nth-child(2) { display: grid; gap: .22rem; }
+.method-options small { color: var(--muted); font-weight: 400; line-height: 1.4; }
+.method-options button > b { color: var(--green-2); font-size: 1.1rem; text-align: center; }
+.method-icon { display: grid; place-items: center; width: 46px; height: 42px; color: white; background: var(--coral); border-radius: 6px; font-size: .7rem; font-weight: 800; letter-spacing: .04em; }
+.method-icon.sheet-icon { background: #39815c; font-size: 1.35rem; }
+.method-instructions { margin-top: .8rem; padding: 1rem 1.1rem; background: #f5f3ed; border-radius: 9px; color: #3d4e48; }
+.method-instructions > strong { font-family: "Fraunces",serif; }
+.method-instructions ol { display: grid; gap: .4rem; margin: .65rem 0 0; padding-left: 1.25rem; color: var(--muted); font-size: .88rem; line-height: 1.5; }
+.guide-action { display: inline-block; margin-top: 1rem; text-decoration: none; }
+.shortcut-row { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem 1rem; margin-top: 1rem; color: #44534e; }
+.shortcut-row kbd { display: inline-block; min-width: 31px; padding: .28rem .42rem; text-align: center; background: white; border: 1px solid #bec7c1; border-bottom-width: 3px; border-radius: 5px; font: 700 .75rem "DM Sans",sans-serif; }
+.shortcut-row small { color: var(--muted); }
 .local-privacy { display: grid; grid-template-columns: .75fr 1.25fr; gap: 4rem; align-items: center; margin-bottom: 90px; padding: 2rem; color: white; background: var(--green); border-radius: 14px; }
 .local-privacy h2 { margin: 0; }
 .local-privacy > p { margin: 0; color: #cbd9d4; line-height: 1.65; }
@@ -156,8 +196,9 @@ input:focus, textarea:focus { border-color: var(--green-2); box-shadow: 0 0 0 3p
 
 @media (max-width: 850px) {
   .local-hero { grid-template-columns: 1fr; }
-  .local-info, .local-privacy { grid-template-columns: 1fr; gap: 1.5rem; }
-  .local-info ol { grid-template-columns: 1fr; }
+  .local-privacy { grid-template-columns: 1fr; gap: 1.5rem; }
+  .method-options { grid-template-columns: 1fr; }
+  .template-counts { grid-template-columns: repeat(5,1fr); }
   .generated-groups { grid-template-columns: 1fr; }
   .group-settings { grid-template-columns: 1fr; }
 }
@@ -165,6 +206,12 @@ input:focus, textarea:focus { border-color: var(--green-2); box-shadow: 0 0 0 3p
   .privacy-pill { display: none; }
   .import-errors { grid-template-columns: 1fr; gap: 1rem; }
   .workspace-heading { flex-direction: column; }
+  .guide-step { grid-template-columns: 40px minmax(0,1fr); gap: .8rem; padding: 1rem; }
+  .guide-number { width: 38px; height: 38px; font-size: 1.05rem; }
+  .method-options button { grid-template-columns: 42px minmax(0,1fr) 20px; padding: .8rem; }
+  .method-icon { width: 40px; height: 38px; }
+  .template-counts { grid-template-columns: repeat(2,1fr); }
+  .template-result { align-items: stretch; flex-direction: column; }
   .shell, .narrow { width: min(100% - 24px, 1180px); }
   .results-head { align-items: flex-start; flex-direction: column; }
   .generate-bar, .section-row { align-items: stretch; flex-direction: column; }

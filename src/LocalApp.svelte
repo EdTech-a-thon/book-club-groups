@@ -3,6 +3,7 @@
   import { downloadGroups } from "./export";
   import { createGroups, type GroupingResult, type GroupingStrategy } from "./grouping";
   import { importResponses, type ImportedResponses, type RankConflict } from "./spreadsheet";
+  import { formTemplateLinks } from "./templateLinks";
 
   let pasted = $state("");
   let imported = $state<ImportedResponses>();
@@ -13,8 +14,12 @@
   let minimumSize = $state(3);
   let maximumSize = $state(4);
   let strategy = $state<GroupingStrategy>("overall");
+  let responseMethod = $state<"csv" | "sheet">("csv");
+  let selectedTemplateRanks = $state<number>();
   let bookLimits = $state<Record<string, number>>({});
   let result = $state<GroupingResult>();
+  const numberWords = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  const selectedTemplateLink = $derived(selectedTemplateRanks ? formTemplateLinks[selectedTemplateRanks] : undefined);
 
   function readResponses(text = pasted, keepResolutions = false) {
     error = "";
@@ -92,8 +97,8 @@
       <p class="local-lede">Collect preferences with your Google Form, paste the spreadsheet here, and get a balanced grouping you can download and adjust.</p>
       <div class="local-promises" aria-label="Privacy details"><span>No account</span><span>No student uploads</span><span>No saved data</span></div>
     </div>
-    <div class="local-start-card">
-      <p class="eyebrow">1 · Add responses</p>
+    <div id="import-responses" class="local-start-card">
+      <p class="eyebrow">Add responses</p>
       <h2>Paste your response sheet.</h2>
       <p>Copy the full range from Google Sheets or Excel, including the header row, or choose its downloaded CSV file.</p>
       <textarea bind:value={pasted} rows="8" aria-label="Spreadsheet responses" placeholder="Paste spreadsheet rows here…"></textarea>
@@ -175,7 +180,45 @@
     </section>
   {/if}
 
-  <section id="how-it-works" class="local-info shell"><div><p class="eyebrow">How it works</p><h2>Form in. Groups out.</h2></div><ol><li><b>1</b><span><strong>Collect choices</strong>Use the Group Readers Google Form template with your own book titles.</span></li><li><b>2</b><span><strong>Paste the responses</strong>Copy the sheet into this page or choose the exported CSV.</span></li><li><b>3</b><span><strong>Download the groups</strong>Generate a draft, then adjust the spreadsheet however you like.</span></li></ol></section>
+  <section id="how-it-works" class="instruction-guide shell">
+    <header><p class="eyebrow">Instruction guide</p><h2>From a form copy to finished groups.</h2><p>Set the form up once, collect your class’s choices, then bring the responses into Group Readers in the way that works best for you.</p></header>
+    <ol class="guide-steps">
+      <li class="guide-step">
+        <div class="guide-number">1</div>
+        <div class="guide-copy full"><p class="eyebrow">Copy the form</p><h3>How many books should each student rank?</h3><p>Select a number first. Group Readers will give you the matching form template.</p><div class="template-counts" role="group" aria-label="Number of books each student should rank">{#each Array.from({ length: 10 }, (_, index) => index + 1) as count}<button class:chosen={selectedTemplateRanks === count} aria-pressed={selectedTemplateRanks === count} onclick={() => (selectedTemplateRanks = count)}><strong>{count}</strong><span>{count === 1 ? "choice" : "choices"}</span></button>{/each}</div>
+          {#if selectedTemplateRanks}
+            {#if selectedTemplateLink}
+              <div class="template-result ready"><div><span>Your template</span><strong>Students rank their top {numberWords[selectedTemplateRanks - 1]} {selectedTemplateRanks === 1 ? "book" : "books"}</strong><small>Google will ask you to name the copy and save it in your Drive.</small></div><a class="button primary" href={selectedTemplateLink} target="_blank" rel="noopener noreferrer">Copy this form</a></div>
+            {:else}
+              <div class="template-result pending"><div><span>Your template</span><strong>Students rank their top {numberWords[selectedTemplateRanks - 1]} {selectedTemplateRanks === 1 ? "book" : "books"}</strong><small>This template link is being prepared and will appear here when it is ready.</small></div></div>
+            {/if}
+          {/if}
+        </div>
+      </li>
+      <li class="guide-step">
+        <div class="guide-number">2</div>
+        <div class="guide-copy"><p class="eyebrow">Edit the form</p><h3>Personalize it for your class.</h3><p>Update the form title and replace the example book titles and descriptions with your own. You can duplicate a question to add more books to the form.</p><aside class="edit-warning"><strong>Leave the name question and "First Choice", "Second Choice", etc. labels unchanged so Group Readers can read the responses correctly.</strong></aside></div>
+      </li>
+      <li class="guide-step highlighted">
+        <div class="guide-number">3</div>
+        <div class="guide-copy full"><p class="eyebrow">Move the responses</p><h3>How do you want to bring the responses into Group Readers?</h3><p>Choose one method to see the complete path from Google Forms into the importer.</p>
+          <div class="method-options" role="group" aria-label="Response export method">
+            <button class:chosen={responseMethod === "csv"} aria-pressed={responseMethod === "csv"} onclick={() => (responseMethod = "csv")}><span class="method-icon">CSV</span><span><strong>Download a CSV</strong><small>Best when you want a file you can keep.</small></span><b aria-hidden="true">{responseMethod === "csv" ? "✓" : ""}</b></button>
+            <button class:chosen={responseMethod === "sheet"} aria-pressed={responseMethod === "sheet"} onclick={() => (responseMethod = "sheet")}><span class="method-icon sheet-icon">▦</span><span><strong>Use the linked spreadsheet</strong><small>Best for copying directly from Google Sheets or Excel.</small></span><b aria-hidden="true">{responseMethod === "sheet" ? "✓" : ""}</b></button>
+          </div>
+          {#if responseMethod === "csv"}
+            <div class="method-instructions"><strong>Download, then import:</strong><ol><li>In Google Forms, open the <b>Responses</b> tab.</li><li>Open the three-dot menu and choose <b>Download responses (.csv)</b>.</li><li>Return to Group Readers and select <b>Choose CSV</b>.</li><li>Open the CSV you just downloaded.</li></ol><a class="button primary guide-action" href="#import-responses">Go to Choose CSV</a></div>
+          {:else}
+            <div class="method-instructions"><strong>Open, copy, then paste:</strong><ol><li>In Google Forms, open the <b>Responses</b> tab and select the green spreadsheet icon.</li><li>Create a response spreadsheet or open the one already linked.</li><li>Select the complete response range, including the header row and every student row, then copy it.</li><li>Return to Group Readers, paste it into the response box, and select <b>Read responses</b>.</li></ol><div class="shortcut-row"><span><kbd>Ctrl</kbd> + <kbd>A</kbd>, then <kbd>Ctrl</kbd> + <kbd>C</kbd></span><small>On a Mac, use ⌘ instead of Ctrl.</small></div><a class="button primary guide-action" href="#import-responses">Go to the paste box</a></div>
+          {/if}
+        </div>
+      </li>
+      <li class="guide-step">
+        <div class="guide-number">4</div>
+        <div class="guide-copy"><p class="eyebrow">Create the groups</p><h3>Review, generate, and download.</h3><p>Resolve any repeated ranks, choose your minimum and maximum group sizes, and generate the best fit. Download the finished CSV to make any final changes in your spreadsheet.</p></div>
+      </li>
+    </ol>
+  </section>
   <section id="privacy" class="local-privacy shell"><div><p class="eyebrow light">Privacy by design</p><h2>Nothing leaves your browser.</h2></div><p>Group Readers does not create an account, upload the response sheet, or save student names. Closing or refreshing this page clears the imported responses and generated groups.</p></section>
 </main>
 

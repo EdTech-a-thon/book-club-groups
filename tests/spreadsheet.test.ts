@@ -33,4 +33,15 @@ describe("spreadsheet import", () => {
     expect(resolved.conflicts).toEqual([]);
     expect(resolved.data?.students[0].choices).toEqual(["book-2"]);
   });
+
+  test("supports exact choice labels through tenth choice", () => {
+    const labels = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"];
+    const headers = ["Name", ...labels.map((_, index) => `Book ${index + 1}`)].join(",");
+    const response = ["Ada", ...labels.map((label) => `${label} Choice`)].join(",");
+    const result = importResponses(`${headers}\n${response}`);
+    expect(result.errors).toEqual([]);
+    expect(result.conflicts).toEqual([]);
+    expect(result.data?.rankedBooks).toBe(10);
+    expect(result.data?.students[0].choices).toHaveLength(10);
+  });
 });
